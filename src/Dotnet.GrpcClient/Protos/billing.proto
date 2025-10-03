@@ -1,0 +1,67 @@
+syntax = "proto3";
+option csharp_namespace = "Dotnet.GprcService"; // Base C# namespace
+package bill; // gRPC package name
+
+enum BillingInvoiceStatus {
+  BILLING_UNKNOWN = 0;
+  BILLING_DRAFT = 1;
+  BILLING_ISSUED = 2;
+  BILLING_PAID = 3;
+  BILLING_CANCELLED = 4;
+}
+
+message BillingCustomerInfo {
+  string customer_id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message BillingInvoiceItem {
+  string product_id = 1;
+  string description = 2;
+  int32 quantity = 3;
+  double unit_price = 4;
+}
+
+message BillingInvoice {
+  string invoice_id = 1;
+  BillingCustomerInfo customer_info = 2;
+  repeated BillingInvoiceItem items = 3;
+  double total_amount = 4;
+  string issue_date = 5;
+  BillingInvoiceStatus status = 6;
+  string notes = 7;
+}
+
+service Billing { // Service name is "Billing"
+  rpc CreateBillingInvoice (CreateBillingInvoiceRequest) returns (BillingInvoice);
+  rpc GetBillingInvoiceById (GetBillingInvoiceByIdRequest) returns (BillingInvoice);
+  rpc UpdateBillingInvoiceStatus (UpdateBillingInvoiceStatusRequest) returns (UpdateBillingInvoiceStatusResponse);
+  rpc ListBillingInvoicesByCustomer (ListBillingInvoicesByCustomerRequest) returns (stream BillingInvoice);
+}
+
+message CreateBillingInvoiceRequest {
+  BillingCustomerInfo customer_info = 1;
+  repeated BillingInvoiceItem items = 2;
+  string notes = 3;
+}
+
+message GetBillingInvoiceByIdRequest {
+  string invoice_id = 1;
+}
+
+message UpdateBillingInvoiceStatusRequest {
+  string invoice_id = 1;
+  BillingInvoiceStatus new_status = 2;
+}
+
+message UpdateBillingInvoiceStatusResponse {
+  string invoice_id = 1;
+  BillingInvoiceStatus new_status = 2;
+  bool success = 3;
+  string message = 4;
+}
+
+message ListBillingInvoicesByCustomerRequest {
+  string customer_id = 1;
+}
